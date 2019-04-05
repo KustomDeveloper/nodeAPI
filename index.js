@@ -63,7 +63,7 @@ const server = http.createServer(function(req, res) {
             res.end(payloadString);
         
             // Log the request path
-            console.log('Returning this response: ', buffer);
+            console.log('Returning this response: ', statusCode, payloadString);
         })
     })
 });
