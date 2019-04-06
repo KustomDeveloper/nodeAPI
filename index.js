@@ -4,13 +4,38 @@
 
 // Dependencies
 const http = require('http');
+const https = require('https');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const config = require('./config');
+const fs = require('fs');
 
-// The server should respond to all requests with a string
-const server = http.createServer(function(req, res) {
+// Instantiate the http server
+const httpServer = http.createServer(function(req, res) {
+    unifiedServer(req, res);
+});
 
+// Start the server and have it listen on port 3000
+httpServer.listen(config.httpPort, function() {
+    console.log("The server is listening on port " +config.httpPort);
+});
+
+// Instantiate the https server
+const httpsServerOptions = {
+    'key' : fs.readFileSync('./https/key.pem'),
+    'cert' : fs.readFileSync('./https/cert.pem')
+}
+const httpsServer = https.createServer(httpsServerOptions,function(req, res) {
+    unifiedServer(req, res);
+});
+
+// Start the server and have it listen on port 3001
+httpsServer.listen(config.httpsPort, function() {
+    console.log("The server is listening on port " +config.httpsPort);
+});
+
+// All the server logic for both the http and https server
+var unifiedServer = function(req, res) {
     // Get the url and parse it
     var parsedUrl = url.parse(req.url, true);
 
@@ -37,7 +62,7 @@ const server = http.createServer(function(req, res) {
         buffer += decoder.end();
 
         // Choose the request this handler should go to, if not found then use the not found handler
-        const chosenHandler = typeof(router[trimmedPath]) !== undefined ? router[trimmedPath] : handlers.notFound;
+        var chosenHandler = typeof(router[trimmedPath]) !== undefined ? router[trimmedPath] : handlers.notFound;
         
         // Construct the data object to send to the handler 
         var data = {
@@ -68,12 +93,7 @@ const server = http.createServer(function(req, res) {
             console.log('Returning this response: ', statusCode, payloadString);
         })
     })
-});
-
-// Start the server and have it listen on port 3000
-server.listen(config.port, function() {
-    console.log("The server is listening on port " +config.port+ " in " +config.envName+ " mode");
-});
+};
 
 // Define the handlers
 const handlers = {};
