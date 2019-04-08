@@ -25,7 +25,7 @@ const httpsServerOptions = {
     'key' : fs.readFileSync('./https/key.pem'),
     'cert' : fs.readFileSync('./https/cert.pem')
 }
-const httpsServer = https.createServer(httpsServerOptions,function(req, res) {
+const httpsServer = https.createServer(httpsServerOptions, function(req, res) {
     unifiedServer(req, res);
 });
 
@@ -79,13 +79,13 @@ var unifiedServer = function(req, res) {
             statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
 
             // Use the payload called back by the handler or default to an empty object
-            payLoad = typeof(payload) == 'object' ? payload : {};
+            payload = typeof(payload) == 'object' ? payload : {};
 
             // Convert the payload to a string
             var payloadString = JSON.stringify(payload);
 
             // Return the response
-            res.setHeader('Content-Type', application/json);
+            res.setHeader('Content-Type', 'application/json');
             res.writeHead(statusCode);
             res.end(payloadString);
         
@@ -98,19 +98,24 @@ var unifiedServer = function(req, res) {
 // Define the handlers
 const handlers = {};
 
-// Sample handler
-handlers.sample = function(data, callback) {
-  //  Callback a http status code and a payload object
-  callback(406, {'name' : 'Sample Handler'});
-};
+// Ping handler
+handlers.ping = function(data, callback) {
+    callback(200);
+}
 
-// Sample handler
+// Hello handler
+handlers.hello = function(data, callback) {
+    callback(200, {'message' : 'Hello, Welcome to my API!'});
+}
+
+// Not found handler
 handlers.notFound = function(data, callback) {
-
+    callback(404);
 };
 
 // Define a request router
 const router = {
-    'sample' : handlers.sample
+    'ping' : handlers.ping,
+    'hello' : handlers.hello
 }
 
